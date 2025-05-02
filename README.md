@@ -13,11 +13,12 @@ Processed Seurat object preview link: https://data.mendeley.com/preview/s27yn9yk
 ### Requirements
 1. R version 4.3.1
 2. R packages
-      Seurat
-      ggplot2
-      data.table
-      dplyr
-      tidyr
-      ArchR
-      pheatmap
-      ggpubr
+
+   Seurat
+   ggplot2
+   data.table
+   dplyr
+   tidyr
+   ArchR
+   pheatmap
+   ggpubr
