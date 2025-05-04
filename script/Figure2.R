@@ -1,3 +1,6 @@
+library(Seurat);library(dplyr);library(ggplot2)
+library(data.table);library(ggpubr);library(ArchR);library(RColorBrewer)
+source('umap_kernel')
 
 plot_ked_umap <- function(se_obj,reduction = 'harmony_umap',n = 200, h = 0.2, quench = 0.015){
   
@@ -66,3 +69,4 @@ plot_ked_umap <- function(se_obj,reduction = 'harmony_umap',n = 200, h = 0.2, qu
   
   add_umap_coord(kernel_umap)
 }
+
