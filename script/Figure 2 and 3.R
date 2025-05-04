@@ -76,9 +76,11 @@ plot_ked_umap <- function(se_obj,reduction = 'harmony_umap',n = 200, h = 0.2, qu
   add_umap_coord(kernel_umap)
 }
 
-##### Figure2 B #####
+##### Figure2 B, Figure3 A,B#####
 
 plot_ked_umap(bc_T_nonk_fil)
+plot_ked_umap(bc_myeloid)
+plot_ked_umap(bc_endo_fib)
 
 ##### Figure2 C #####
 
@@ -178,3 +180,44 @@ for(i in rownames(tcr_share_prop)){
 
 pheatmap(tcr_share_prop,cluster_rows = F,cluster_cols = F,color = colour_bk2,border_color = NA)
 
+##### Figure3 F ######
+
+library(CellChat)
+library(patchwork)
+options(stringsAsFactors = FALSE)
+
+ptm = Sys.time()
+cellchat <- createCellChat(object = bc_cellchat_se, group.by = "cellType_chat")
+CellChatDB <- CellChatDB.human
+
+# use a subset of CellChatDB for cell-cell communication analysis
+CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling", key = "annotation") # use Secreted Signaling
+
+# Only uses the Secreted Signaling from CellChatDB v1
+#  CellChatDB.use <- subsetDB(CellChatDB, search = list(c("Secreted Signaling"), c("CellChatDB v1")), key = c("annotation", "version"))
+
+# use all CellChatDB except for "Non-protein Signaling" for cell-cell communication analysis
+ CellChatDB.use <- subsetDB(CellChatDB)
+
+# use all CellChatDB for cell-cell communication analysis
+# CellChatDB.use <- CellChatDB 
+
+#CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Contact", key = "annotation")
+cellchat@DB <- CellChatDB.use
+
+# subset the expression data of signaling genes for saving computation cost
+cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+future::plan("multisession", workers = 4) # do parallel
+options(future.globals.maxSize = 20000 * 1024^2)
+cellchat <- identifyOverExpressedGenes(cellchat)
+cellchat <- identifyOverExpressedInteractions(cellchat)
+
+cellchat <- computeCommunProb(cellchat, type = "triMean",trim = 0,k.min = 2)
+#cellchat <- filterCommunication(cellchat, min.cells = 0,min.prob = 0)
+cellchat <- computeCommunProbPathway(cellchat,thresh = 1)
+cellchat <- aggregateNet(cellchat)
+
+netVisual_bubble(cellchat, sources.use = c('CAF_BC','CAF_BCLM','Endo_BC','Endo_BCLM'),
+  targets.use = c('T_PD1pos','T_PD1neg'),angle.x = 90, remove.isolate = T,thresh = 1,signaling = 'CXCL')
+
+##### The End #####
