@@ -48,4 +48,18 @@ top_anno = top_anno[order(top_anno$tissue,top_anno$subtype),]
 pheatmap(ct_roe[,rownames(top_anno)],scale = 'row',cluster_cols = F,color = colour_bk,breaks = bk,show_colnames = F)
 
 ##### Figure1 E-H #####
-bc_all_plot_df = table()
+bc_tme_AUC <- AUCell_run(bc_tme_se@assays$RNA$data, signature_list,aucMaxRank=10000)
+bc_tme_se$is_TNK = ifelse(bc_tme_se$cellType_1 == 'T/NK cells',1,0)
+bc_tme_se$is_Fib = ifelse(bc_tme_se$cellType_1 == 'Fibroblast',1,0)
+bc_tme_se$IFNG_pos = ifelse(bc_tme_se[['RNA']]@counts['IFNG',]>0,1,0)
+bc_tme_se$TNF_pos = ifelse(bc_tme_se[['RNA']]@counts['TNF',]>0,1,0)
+bc_tme_se$Cyt_score = bc_tme_se[['RNA']]@counts['GZMA',]+bc_tme_se[['RNA']]@counts['PRF1',]
+bc_tme_se$pro_inflam = bc_tme_AUC@assays@data@listData[["AUC"]]['pro_inflam',]
+
+bc_tme_prop_df = aggregate(cbind(is_TNK,is_Fib,IFNG_pos,TNF_pos,Cyt_score,pro_inflam)~orig.ident+Patient+Tissue,data = subset(bc_tme_se,subset = Patient != 'CASE5')@meta.data,mean)
+only_draw_pair_boxplot(bc_tme_prop_df,list(c('BC','BCLM')),x = 'Tissue', y = 'is_TNK', fill = 'Tissue', group = 'Patient', y_lab = 'T/NK% among TME')
+only_draw_pair_boxplot(bc_tme_prop_df,list(c('BC','BCLM')),x = 'Tissue', y = 'is_Fib', fill = 'Tissue', group = 'Patient', y_lab = 'Fib% among TME')
+only_draw_pair_boxplot(bc_tme_prop_df,list(c('BC','BCLM')),x = 'Tissue', y = 'IFNG_pos', fill = 'Tissue', group = 'Patient', y_lab = 'IFNG+% among TME')
+only_draw_pair_boxplot(bc_tme_prop_df,list(c('BC','BCLM')),x = 'Tissue', y = 'TNF_pos', fill = 'Tissue', group = 'Patient', y_lab = 'TNF+% among TME')
+only_draw_pair_boxplot(bc_tme_prop_df,list(c('BC','BCLM')),x = 'Tissue', y = 'Cyt_score', fill = 'Tissue', group = 'Patient', y_lab = 'Cytolytic activity')
+only_draw_pair_boxplot(bc_tme_prop_df,list(c('BC','BCLM')),x = 'Tissue', y = 'pro_inflam', fill = 'Tissue', group = 'Patient', y_lab = 'Cytolytic activity')
