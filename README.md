@@ -11,7 +11,7 @@ Processed Seurat object preview link: https://data.mendeley.com/preview/s27yn9yk
 
 ## Data visualization
 ### Requirements
-Tested on macOS Monterey
+Tested on Windows 11
 1. R version 4.3.1
 2. R packages
    - Seurat
